@@ -21,7 +21,12 @@ namespace MagazynPro.Controllers
         // GET: Zamowienia
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Zamowienia.ToListAsync());
+            var zamowienia = await _context.Zamowienia
+                .Include(z => z.Klient) // Pobierz dane klienta
+                .Include(z => z.Produkt) // Pobierz dane produktu
+                .ToListAsync();
+
+            return View(zamowienia);
         }
 
         // GET: Zamowienia/Details/5
@@ -32,14 +37,17 @@ namespace MagazynPro.Controllers
                 return NotFound();
             }
 
-            var zamowienia = await _context.Zamowienia
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (zamowienia == null)
+            var zamowienie = await _context.Zamowienia
+                .Include(z => z.Produkt)
+                .Include(z => z.Klient)
+                .FirstOrDefaultAsync(z => z.Id == id);
+
+            if (zamowienie == null)
             {
                 return NotFound();
             }
 
-            return View(zamowienia);
+            return View(zamowienie);
         }
 
         // GET: Zamowienia/Create
@@ -53,6 +61,7 @@ namespace MagazynPro.Controllers
         // POST: Zamowienia/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProduktId,Ilosc")] Zamowienie zamowienie)
@@ -71,8 +80,7 @@ namespace MagazynPro.Controllers
                         Console.WriteLine($"Pole: {key}, Błąd: {error.ErrorMessage}");
                     }
                 }
-            }
-            if (ModelState.IsValid)
+            }            if (ModelState.IsValid)
             {
                 Console.WriteLine("ModelState jest poprawny.");
 
@@ -131,6 +139,63 @@ namespace MagazynPro.Controllers
             ViewData["ProduktId"] = new SelectList(_context.Produkty, "Id", "NazwaProduktu", zamowienie.ProduktId);
             return View(zamowienie);
         }
+        */
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("ProduktId,Ilosc")] Zamowienie zamowienie)
+        {
+            Console.WriteLine($"ProduktId: {zamowienie.ProduktId}");
+            Console.WriteLine($"Ilosc: {zamowienie.Ilosc}");
+            Console.WriteLine($"UserId: {User.FindFirstValue(ClaimTypes.NameIdentifier)}");
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Pobierz UserId zalogowanego użytkownika
+            var klient = await _context.Klienci.FirstOrDefaultAsync(k => k.UserId == userId);
+
+            if (klient == null)
+            {
+                Console.WriteLine("Klient nie został znaleziony.");
+                ModelState.AddModelError(string.Empty, "Nie znaleziono klienta powiązanego z użytkownikiem.");
+                ViewData["ProduktId"] = new SelectList(_context.Produkty, "Id", "NazwaProduktu", zamowienie.ProduktId);
+                return View(zamowienie);
+            }
+
+            zamowienie.KlientId = klient.UserId; // Przypisz KlientId jako UserId klienta
+            zamowienie.DataZamowienia = DateTime.Now;
+
+            var produkt = await _context.Produkty.FindAsync(zamowienie.ProduktId);
+            if (produkt == null)
+            {
+                Console.WriteLine("Produkt nie został znaleziony.");
+                ModelState.AddModelError("ProduktId", "Wybrany produkt nie istnieje.");
+                ViewData["ProduktId"] = new SelectList(_context.Produkty, "Id", "NazwaProduktu", zamowienie.ProduktId);
+                return View(zamowienie);
+            }
+
+            if (zamowienie.Ilosc > produkt.Ilosc)
+            {
+                ModelState.AddModelError("Ilosc", "Zamówiona ilość przekracza dostępny stan magazynowy.");
+                ViewData["ProduktId"] = new SelectList(_context.Produkty, "Id", "NazwaProduktu", zamowienie.ProduktId);
+                return View(zamowienie);
+            }
+
+            try
+            {
+                produkt.Ilosc -= zamowienie.Ilosc;
+                _context.Update(produkt);
+
+                _context.Zamowienia.Add(zamowienie);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Błąd podczas dodawania zamówienia: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "Wystąpił błąd podczas dodawania zamówienia.");
+                return View(zamowienie);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
 
         // GET: Zamowienia/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -140,12 +205,17 @@ namespace MagazynPro.Controllers
                 return NotFound();
             }
 
-            var zamowienia = await _context.Zamowienia.FindAsync(id);
-            if (zamowienia == null)
+            var zamowienie = await _context.Zamowienia
+                .Include(z => z.Produkt)
+                .Include(z => z.Klient)
+                .FirstOrDefaultAsync(z => z.Id == id);
+
+            if (zamowienie == null)
             {
                 return NotFound();
             }
-            return View(zamowienia);
+
+            return View(zamowienie);
         }
 
         // POST: Zamowienia/Edit/5
@@ -191,14 +261,17 @@ namespace MagazynPro.Controllers
                 return NotFound();
             }
 
-            var zamowienia = await _context.Zamowienia
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (zamowienia == null)
+            var zamowienie = await _context.Zamowienia
+                .Include(z => z.Produkt)
+                .Include(z => z.Klient)
+                .FirstOrDefaultAsync(z => z.Id == id);
+
+            if (zamowienie == null)
             {
                 return NotFound();
             }
 
-            return View(zamowienia);
+            return View(zamowienie);
         }
 
         // POST: Zamowienia/Delete/5
@@ -209,6 +282,7 @@ namespace MagazynPro.Controllers
             var zamowienia = await _context.Zamowienia.FindAsync(id);
             if (zamowienia != null)
             {
+
                 _context.Zamowienia.Remove(zamowienia);
             }
 

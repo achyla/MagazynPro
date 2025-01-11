@@ -10,21 +10,34 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Imie" class="control-label"></label>
-                <input asp-for="Imie" class="form-control" />
+        <form id="createKlientForm" asp-action="Create" method="post">
+            <h2>Dodaj nowego klienta.</h2>
+            <hr />
+
+            <!-- Walidacja globalna -->
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <!-- Pole Imię -->
+            <div class="form-floating mb-3">
+                <input asp-for="Imie" class="form-control" aria-required="true" placeholder="Imię" />
+                <label asp-for="Imie">Imię <span class="text-danger">*</span></label>
                 <span asp-validation-for="Imie" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Nazwisko" class="control-label"></label>
-                <input asp-for="Nazwisko" class="form-control" />
+
+            <!-- Pole Nazwisko -->
+            <div class="form-floating mb-3">
+                <input asp-for="Nazwisko" class="form-control" aria-required="true" placeholder="Nazwisko" />
+                <label asp-for="Nazwisko">Nazwisko <span class="text-danger">*</span></label>
                 <span asp-validation-for="Nazwisko" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+
+            <!-- Pole UserId -->
+            <input asp-for="UserId" type="hidden" />
+
+            <!-- Informacja o wymaganych polach -->
+            <small class="text-muted">* Pola wymagane</small>
+            <br />
+            <button type="submit" class="btn btn-primary">Dodaj klienta</button>
         </form>
     </div>
 </div>

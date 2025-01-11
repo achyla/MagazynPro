@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MagazynPro.Data;
+using System.Security.Claims;
 
 namespace MagazynPro.Controllers
 {
@@ -21,11 +22,13 @@ namespace MagazynPro.Controllers
         // GET: Klients
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Klienci.ToListAsync());
+            var klienci = await _context.Klienci.ToListAsync();
+            return View(klienci);
         }
 
+
         // GET: Klients/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(string id)
         {
             if (id == null)
             {
@@ -33,7 +36,7 @@ namespace MagazynPro.Controllers
             }
 
             var klient = await _context.Klienci
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.UserId == id);
             if (klient == null)
             {
                 return NotFound();
@@ -41,6 +44,7 @@ namespace MagazynPro.Controllers
 
             return View(klient);
         }
+
 
         // GET: Klients/Create
         public IActionResult Create()
@@ -53,19 +57,34 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Imie,Nazwisko,Email")] Klient klient)
+        public async Task<IActionResult> Create([Bind("Imie,Nazwisko")] Klient klient)
         {
+            // Pobierz UserId zalogowanego użytkownika
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                ModelState.AddModelError("", "Nie można przypisać użytkownika do klienta.");
+                return View(klient);
+            }
+
+            // Przypisz UserId do klienta
+            klient.UserId = userId;
+
+            // Walidacja i zapis do bazy
             if (ModelState.IsValid)
             {
-                _context.Add(klient);
+                _context.Klienci.Add(klient);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)); // Przekierowanie do listy klientów
             }
+
             return View(klient);
         }
 
-        // GET: Klients/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Klients/Edit
+
+        public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
             {
@@ -77,6 +96,7 @@ namespace MagazynPro.Controllers
             {
                 return NotFound();
             }
+
             return View(klient);
         }
 
@@ -85,9 +105,9 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Imie,Nazwisko,Email")] Klient klient)
+        public async Task<IActionResult> Edit(string id, [Bind("UserId,Imie,Nazwisko")] Klient klient)
         {
-            if (id != klient.Id)
+            if (id != klient.UserId)
             {
                 return NotFound();
             }
@@ -101,7 +121,7 @@ namespace MagazynPro.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!KlientExists(klient.Id))
+                    if (!KlientExists(klient.UserId))
                     {
                         return NotFound();
                     }
@@ -115,8 +135,15 @@ namespace MagazynPro.Controllers
             return View(klient);
         }
 
+        private bool KlientExists(string id)
+        {
+            return _context.Klienci.Any(e => e.UserId == id);
+        }
+
+
+
         // GET: Klients/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
             {
@@ -124,7 +151,7 @@ namespace MagazynPro.Controllers
             }
 
             var klient = await _context.Klienci
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.UserId == id);
             if (klient == null)
             {
                 return NotFound();
@@ -133,24 +160,20 @@ namespace MagazynPro.Controllers
             return View(klient);
         }
 
+
         // POST: Klients/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var klient = await _context.Klienci.FindAsync(id);
             if (klient != null)
             {
                 _context.Klienci.Remove(klient);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool KlientExists(int id)
-        {
-            return _context.Klienci.Any(e => e.Id == id);
         }
     }
 }

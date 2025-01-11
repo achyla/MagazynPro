@@ -9,45 +9,38 @@
 <p>
     <a asp-action="Create">Dodaj nowe zamówienie</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NazwaProduktu)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ilosc)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataZamowienia)
-            </th>
-            <th>
-                @Html.DisplayName("Klient")
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NazwaProduktu)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Ilosc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataZamowienia)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Klient.Imie)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edytuj</a>
-                <a asp-action="Details" asp-route-id="@item.Id">Szczegóły</a>
-                <a asp-action="Delete" asp-route-id="@item.Id">Usuń</a>
-            </td>
-        </tr>
+
+@if (!Model.Any())
+{
+    <p>Brak zamówień do wyświetlenia.</p>
 }
-    </tbody>
-</table>
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@Html.DisplayName("Produkt")</th>
+                <th>@Html.DisplayNameFor(model => model.First().Ilosc)</th>
+                <th>@Html.DisplayNameFor(model => model.First().DataZamowienia)</th>
+                <th>@Html.DisplayName("Klient")</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Produkt.NazwaProduktu)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Ilosc)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DataZamowienia)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Klient.Imie)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Edytuj</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Szczegóły</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Usuń</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

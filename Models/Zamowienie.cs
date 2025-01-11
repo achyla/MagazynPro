@@ -8,22 +8,22 @@
     {
         public int Id { get; set; }
 
-        [Display(Name = "Nazwa Produktu")]
-        public  string NazwaProduktu { get; set; }
-
         [Required(ErrorMessage = "Ilość jest wymagana.")]
         [Display(Name = "Ilość")]
-        [Range(1, int.MaxValue, ErrorMessage = "Ilość musi być większa niż 0.")]
-        public int Ilosc { get; set; }
+        [Range(1, int.MaxValue)]
+        public required int Ilosc { get; set; }
 
+        [Required(ErrorMessage = "Data zamówienia jest wymagana.")]
         [Display(Name = "Data Zamówienia")]
         public DateTime DataZamowienia { get; set; }
 
+        [Required(ErrorMessage = "Klient jest wymagany.")]
         [ForeignKey("Klient")]
         [Display(Name = "Klient")]
-        public int KlientId { get; set; }
+        public string KlientId { get; set; }
         public Klient Klient { get; set; }
 
+        [Required(ErrorMessage = "Produkt jest wymagany.")]
         [ForeignKey("Produkt")]
         public int ProduktId { get; set; } // Klucz obcy do modelu Produkt
         public Produkt Produkt { get; set; } // Relacja do modelu Produkt

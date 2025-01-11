@@ -6,5 +6,6 @@ namespace MagazynPro.Models
         {
             public string Imie { get; set; }
             public string Nazwisko { get; set; }
-        }
+            public virtual Klient Klient { get; set; }
+    }
 }

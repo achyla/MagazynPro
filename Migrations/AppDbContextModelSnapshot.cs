@@ -24,11 +24,8 @@ namespace MagazynPro.Migrations
 
             modelBuilder.Entity("Klient", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Imie")
                         .IsRequired()
@@ -39,11 +36,7 @@ namespace MagazynPro.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.ToTable("Klienci");
                 });
@@ -70,6 +63,9 @@ namespace MagazynPro.Migrations
                     b.Property<string>("Imie")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("KlientUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -110,6 +106,8 @@ namespace MagazynPro.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("KlientUserId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -135,12 +133,9 @@ namespace MagazynPro.Migrations
                     b.Property<int>("Ilosc")
                         .HasColumnType("int");
 
-                    b.Property<int>("KlientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("NazwaProduktu")
+                    b.Property<string>("KlientId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ProduktId")
                         .HasColumnType("int");
@@ -309,6 +304,15 @@ namespace MagazynPro.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Produkty");
+                });
+
+            modelBuilder.Entity("MagazynPro.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("Klient", "Klient")
+                        .WithMany()
+                        .HasForeignKey("KlientUserId");
+
+                    b.Navigation("Klient");
                 });
 
             modelBuilder.Entity("MagazynPro.Models.Zamowienie", b =>
