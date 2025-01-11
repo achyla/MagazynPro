@@ -37,10 +37,17 @@ namespace MagazynPro.Data
                     Nazwisko = "Administrator"
                 };
 
-                var result = await userManager.CreateAsync(adminUser, "admin");
+                var result = await userManager.CreateAsync(adminUser, "Admin@123");
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        Console.WriteLine($"Error: {error.Description}");
+                    }
                 }
             }
         }

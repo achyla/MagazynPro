@@ -12,10 +12,10 @@ public class Klient
     [Required(ErrorMessage = "Nazwisko jest wymagane.")]
     public required string Nazwisko { get; set; }
 
-    [Required(ErrorMessage = "Email jest wymagany.")]
-    [EmailAddress(ErrorMessage = "Niepoprawny format adresu email.")]
-    public required string Email { get; set; }
-
     // Relacja z zamówieniami
-    public required ICollection<Zamowienia> Zamowienia { get; set; }
+    public ICollection<Zamowienie> Zamowienia { get; set; }
+    public Klient()
+    {
+        Zamowienia = new List<Zamowienie>();
+    }
 }

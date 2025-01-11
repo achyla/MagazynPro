@@ -11,23 +11,49 @@
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h2>Create a new account.</h2>
             <hr />
+
+            <!-- Walidacja globalna -->
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <!-- Pole Imię -->
             <div class="form-floating mb-3">
-                <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username" />
-                <label asp-for="Input.Username">Username</label>
+                <input asp-for="Input.Imie" class="form-control" aria-required="true" placeholder="Imię" />
+                <label asp-for="Input.Imie">Imię <span class="text-danger">*</span></label>
+                <span asp-validation-for="Input.Imie" class="text-danger"></span>
+            </div>
+
+            <!-- Pole Nazwisko -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Nazwisko" class="form-control" aria-required="true" placeholder="Nazwisko" />
+                <label asp-for="Input.Nazwisko">Nazwisko <span class="text-danger">*</span></label>
+                <span asp-validation-for="Input.Nazwisko" class="text-danger"></span>
+            </div>
+
+            <!-- Pole Username -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="Nazwa użytkownika" />
+                <label asp-for="Input.Username">Nazwa użytkownika <span class="text-danger">*</span></label>
                 <span asp-validation-for="Input.Username" class="text-danger"></span>
             </div>
+
+            <!-- Pole Hasło -->
             <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Hasło" />
+                <label asp-for="Input.Password">Hasło <span class="text-danger">*</span></label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
+
+            <!-- Pole Potwierdzenie hasła -->
             <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Potwierdź hasło" />
+                <label asp-for="Input.ConfirmPassword">Potwierdź hasło <span class="text-danger">*</span></label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+
+            <!-- Informacja o wymaganych polach -->
+            <small class="text-muted">* Pola wymagane</small>
+            <br />
+            <button type="submit" class="btn btn-primary">Zarejestruj</button>
         </form>
     </div>
 </div>

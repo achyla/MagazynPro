@@ -14,5 +14,5 @@ public class Produkt
     public decimal Cena { get; set; }
 
     // Relacja z zamówieniami (opcjonalne)
-    public required ICollection<Zamowienia> Zamowienia { get; set; }
+    public required ICollection<Zamowienie> Zamowienia { get; set; }
 }

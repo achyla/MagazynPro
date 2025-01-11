@@ -10,7 +10,7 @@ namespace MagazynPro.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<Zamowienia> Zamowienia { get; set; }
+        public DbSet<Zamowienie> Zamowienia { get; set; }
         public DbSet<Klient> Klienci { get; set; }
         public DbSet<Produkt> Produkty { get; set; }
 
@@ -18,8 +18,13 @@ namespace MagazynPro.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Produkt>()
+                .Property(p => p.Cena)
+                .HasColumnType("decimal(8,2)"); // Ustawienie precyzji i skali
+
             // Dodanie konfiguracji dla ApplicationUser
             builder.ApplyConfiguration(new ApplicationUserEntityConfiguration());
+
         }
 
         private class ApplicationUserEntityConfiguration : IEntityTypeConfiguration<ApplicationUser>

@@ -48,7 +48,16 @@ namespace MagazynPro.Controllers
         // GET: Zamowienia/Create
         public IActionResult Create()
         {
-            ViewData["KlientId"] = new SelectList(_context.Klienci, "Id", "Imie");
+            var klienci = _context.Klienci
+                .Select(k => new
+                {
+                    k.Id, // To będzie wartość w dropdownie
+                    ImieNazwisko = $"{k.Imie} {k.Nazwisko}" // To będzie tekst wyświetlany w dropdownie
+                })
+                .ToList();
+
+            ViewBag.Klienci = new SelectList(klienci, "Id", "ImieNazwisko");
+
             return View();
         }
 
@@ -57,16 +66,25 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NazwaProduktu,Ilosc,DataZamowienia")] Zamowienia zamowienia)
+        public async Task<IActionResult> Create([Bind("Id,NazwaProduktu,Ilosc,DataZamowienia,KlientId")] Zamowienie zamowienia)
         {
+            if (!ModelState.IsValid)
+            {
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Błąd: {error.ErrorMessage}");
+                }
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(zamowienia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["KlientId"] = new SelectList(_context.Klienci, "Id", "Imie", zamowienia.KlientId);
+
+            ViewData["KlientId"] = new SelectList(_context.Klienci, "Id", "ImieNazwisko", zamowienia.KlientId);
             return View(zamowienia);
+
         }
 
         // GET: Zamowienia/Edit/5
@@ -90,7 +108,7 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NazwaProduktu,Ilosc,DataZamowienia")] Zamowienia zamowienia)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,NazwaProduktu,Ilosc,DataZamowienia,KlientId")] Zamowienie zamowienia)
         {
             if (id != zamowienia.Id)
             {

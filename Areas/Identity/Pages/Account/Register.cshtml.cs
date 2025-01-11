@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using MagazynPro.Data;
 using MagazynPro.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MagazynPro.Areas.Identity.Pages.Account
@@ -28,17 +30,21 @@ namespace MagazynPro.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly ILogger<RegisterModel> _logger;
+        private readonly AppDbContext _context; // Dodanie kontekstu bazy danych
+
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger)
+            ILogger<RegisterModel> logger,
+            AppDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         /// <summary>
@@ -131,12 +137,27 @@ namespace MagazynPro.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    _logger.LogInformation("Użytkownik został utworzony.");
+
+                    // Dodanie użytkownika jako klienta w tabeli Klienci
+                    var klient = new Klient
+                    {
+                        Imie = Input.Imie,
+                        Nazwisko = Input.Nazwisko,
+                    };
+
+                    // Zapisanie klienta do bazy danych
+                    _context.Klienci.Add(klient);
+                    await _context.SaveChangesAsync(); // Zapisanie zmian w bazie danych
+
+
+                    await _userManager.AddToRoleAsync(user, "User");
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);
                 }
                 foreach (var error in result.Errors)
                 {
+                    _logger.LogError($"Błąd podczas rejestracji: {error.Description}");
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
