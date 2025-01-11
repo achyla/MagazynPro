@@ -11,6 +11,8 @@ namespace MagazynPro.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Zamowienia> Zamowienia { get; set; }
+        public DbSet<Klient> Klienci { get; set; }
+        public DbSet<Produkt> Produkty { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
