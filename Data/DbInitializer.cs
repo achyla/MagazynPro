@@ -25,7 +25,6 @@ namespace MagazynPro.Data
             }
 
             // Tworzenie użytkownika Administratora
-            var adminEmail = "admin@example.com";
             var adminUsername = "admin";
             var adminUser = await userManager.FindByNameAsync(adminUsername);
             if (adminUser == null)

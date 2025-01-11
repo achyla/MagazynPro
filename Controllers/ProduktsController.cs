@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MagazynPro.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MagazynPro.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProduktsController : Controller
     {
         private readonly AppDbContext _context;
@@ -53,14 +55,34 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nazwa,Cena")] Produkt produkt)
+        public async Task<IActionResult> Create([Bind("NazwaProduktu,Cena,Ilosc")] Produkt produkt)
         {
+            //Console.WriteLine($"Nazwa: {produkt.NazwaProduktu}");
+            //Console.WriteLine($"Cena: {produkt.Cena}");
+            //Console.WriteLine($"Ilość: {produkt.Ilosc}");
             if (ModelState.IsValid)
             {
-                _context.Add(produkt);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(produkt);
+                    await _context.SaveChangesAsync(); // Próba zapisania produktu w bazie danych
+                    return RedirectToAction(nameof(Index)); // Przekierowanie do listy produktów
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Błąd podczas dodawania produktu: {ex.Message}");
+                    ModelState.AddModelError(string.Empty, "Wystąpił błąd podczas dodawania produktu.");
+                }
             }
+            else
+            {
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Błąd walidacji: {error.ErrorMessage}");
+                }
+            }
+
+            // Jeśli coś poszło nie tak, zwróć widok z produktem
             return View(produkt);
         }
 
@@ -85,7 +107,7 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nazwa,Cena")] Produkt produkt)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,NazwaProduktu,Cena,Ilosc")] Produkt produkt)
         {
             if (id != produkt.Id)
             {

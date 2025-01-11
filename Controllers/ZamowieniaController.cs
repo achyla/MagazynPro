@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using MagazynPro.Data;
+using MagazynPro.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using MagazynPro.Data;
-using MagazynPro.Models;
-using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace MagazynPro.Controllers
 {
@@ -48,16 +45,8 @@ namespace MagazynPro.Controllers
         // GET: Zamowienia/Create
         public IActionResult Create()
         {
-            var klienci = _context.Klienci
-                .Select(k => new
-                {
-                    k.Id, // To będzie wartość w dropdownie
-                    ImieNazwisko = $"{k.Imie} {k.Nazwisko}" // To będzie tekst wyświetlany w dropdownie
-                })
-                .ToList();
-
-            ViewBag.Klienci = new SelectList(klienci, "Id", "ImieNazwisko");
-
+            // Pobierz listę nazw produktów z bazy danych
+            ViewData["ProduktId"] = new SelectList(_context.Produkty, "Id", "NazwaProduktu");
             return View();
         }
 
@@ -66,25 +55,81 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NazwaProduktu,Ilosc,DataZamowienia,KlientId")] Zamowienie zamowienia)
+        public async Task<IActionResult> Create([Bind("ProduktId,Ilosc")] Zamowienie zamowienie)
         {
+            // Logowanie przychodzących danych
+            Console.WriteLine($"ProduktId: {zamowienie.ProduktId}");
+            Console.WriteLine($"Ilosc: {zamowienie.Ilosc}");
             if (!ModelState.IsValid)
             {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                Console.WriteLine("ModelState nie jest poprawny.");
+                foreach (var key in ModelState.Keys)
                 {
-                    Console.WriteLine($"Błąd: {error.ErrorMessage}");
+                    var state = ModelState[key];
+                    foreach (var error in state.Errors)
+                    {
+                        Console.WriteLine($"Pole: {key}, Błąd: {error.ErrorMessage}");
+                    }
                 }
             }
             if (ModelState.IsValid)
             {
-                _context.Add(zamowienia);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                Console.WriteLine("ModelState jest poprawny.");
+
+                try
+                {
+                    // Przypisz zalogowanego użytkownika jako klienta
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    Console.WriteLine($"Zalogowany użytkownik ID: {userId}");
+
+                    var klient = await _context.Klienci.FirstOrDefaultAsync(k => k.UserId == userId);
+                    if (klient == null)
+                    {
+                        Console.WriteLine("Nie znaleziono klienta powiązanego z użytkownikiem.");
+                        ModelState.AddModelError(string.Empty, "Nie znaleziono klienta powiązanego z użytkownikiem.");
+                        ViewData["ProduktId"] = new SelectList(_context.Produkty, "Id", "NazwaProduktu", zamowienie.ProduktId);
+                        return View(zamowienie);
+                    }
+                    Console.WriteLine($"Znaleziono klienta: {klient.Id}");
+
+                    var produkt = await _context.Produkty.FindAsync(zamowienie.ProduktId);
+                    if (produkt == null)
+                    {
+                        Console.WriteLine($"Nie znaleziono produktu o ID {zamowienie.ProduktId}");
+                        ModelState.AddModelError("ProduktId", "Wybrany produkt nie istnieje.");
+                    }
+                    else if (zamowienie.Ilosc > produkt.Ilosc)
+                    {
+                        Console.WriteLine($"Zamówiona ilość ({zamowienie.Ilosc}) przekracza dostępny stan magazynowy ({produkt.Ilosc}).");
+                        ModelState.AddModelError("Ilosc", "Zamówiona ilość przekracza dostępny stan magazynowy.");
+                    }
+                    else
+                    {
+                        // Zmniejsz ilość produktu w magazynie
+                        produkt.Ilosc -= zamowienie.Ilosc;
+                        _context.Update(produkt);
+
+                        // Przypisz klienta i datę zamówienia
+                        zamowienie.KlientId = klient.Id;
+                        zamowienie.DataZamowienia = DateTime.Now;
+
+                        // Dodaj zamówienie do bazy danych
+                        _context.Zamowienia.Add(zamowienie);
+                        await _context.SaveChangesAsync();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Logowanie błędów
+                    Console.WriteLine($"Błąd podczas dodawania zamówienia: {ex.Message}");
+                    ModelState.AddModelError(string.Empty, "Wystąpił błąd podczas dodawania zamówienia.");
+                }
+
             }
-
-            ViewData["KlientId"] = new SelectList(_context.Klienci, "Id", "ImieNazwisko", zamowienia.KlientId);
-            return View(zamowienia);
-
+            ViewData["ProduktId"] = new SelectList(_context.Produkty, "Id", "NazwaProduktu", zamowienie.ProduktId);
+            return View(zamowienie);
         }
 
         // GET: Zamowienia/Edit/5

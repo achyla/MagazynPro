@@ -10,21 +10,23 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Create" method="post">
             <div class="form-group">
-                <label asp-for="Nazwa" class="control-label"></label>
-                <input asp-for="Nazwa" class="form-control" />
-                <span asp-validation-for="Nazwa" class="text-danger"></span>
+                <label asp-for="NazwaProduktu" class="control-label"></label>
+                <input asp-for="NazwaProduktu" class="form-control" />
+                <span asp-validation-for="NazwaProduktu" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Cena" class="control-label"></label>
-                <input asp-for="Cena" class="form-control" />
+                <input asp-for="Cena" class="form-control" type="number" step="0.01" />
                 <span asp-validation-for="Cena" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <label asp-for="Ilosc" class="control-label"></label>
+                <input asp-for="Ilosc" class="form-control" type="number" />
+                <span asp-validation-for="Ilosc" class="text-danger"></span>
             </div>
+            <button type="submit" class="btn btn-primary">Dodaj produkt</button>
         </form>
     </div>
 </div>

@@ -142,6 +142,7 @@ namespace MagazynPro.Areas.Identity.Pages.Account
                     // Dodanie użytkownika jako klienta w tabeli Klienci
                     var klient = new Klient
                     {
+                        UserId = user.Id,
                         Imie = Input.Imie,
                         Nazwisko = Input.Nazwisko,
                     };
