@@ -1,8 +1,20 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Strona główna";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container text-center mt-5">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <h1 class="display-4 text-primary">MagazynPro</h1>
+            <p class="lead text-secondary">Zarządzaj zamówieniami, produktami i klientami w jednym miejscu.</p>
+            <p>Odkryj, jak łatwo zarządzać swoim magazynem za pomocą naszej aplikacji!</p>
+            <a href="/Zamowienia/Index" class="btn btn-primary btn-lg mt-3">Zobacz zamówienia</a>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center">
+        <img src="https://cdn.pixabay.com/photo/2021/07/12/10/32/shelf-6405974_1280.png"
+             alt="Tematyka zamówień, sklepu lub magazynu"
+             class="img-fluid rounded"
+             style="width: 40%; height: auto;">
+    </div>
 </div>

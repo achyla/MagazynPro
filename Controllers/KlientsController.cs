@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MagazynPro.Data;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using MagazynPro.Models;
 
 namespace MagazynPro.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class KlientsController : Controller
     {
         private readonly AppDbContext _context;

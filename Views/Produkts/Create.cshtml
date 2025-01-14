@@ -1,12 +1,10 @@
 ﻿@model Produkt
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Dodaj produkt";
 }
 
-<h1>Create</h1>
-
-<h4>Produkt</h4>
+<h1>Dodaj nowy produkt</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -17,22 +15,24 @@
                 <span asp-validation-for="NazwaProduktu" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Cena" class="control-label"></label>
-                <input asp-for="Cena" class="form-control" type="number" step="0.01" />
-                <span asp-validation-for="Cena" class="text-danger"></span>
+                <label asp-for="CenaInput" class="control-label"></label>
+                <input asp-for="CenaInput" class="form-control" type="text" />
+                <span asp-validation-for="CenaInput" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Ilosc" class="control-label"></label>
                 <input asp-for="Ilosc" class="form-control" type="number" />
                 <span asp-validation-for="Ilosc" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Dodaj produkt</button>
+            <br>
+            <button type="submit" class="btn btn-primary">Dodaj</button>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Lista zamówień</a>
 </div>
 
 @section Scripts {

@@ -1,4 +1,4 @@
-﻿using System;
+﻿  using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MagazynPro.Data;
 using Microsoft.AspNetCore.Authorization;
+using MagazynPro.Models;
 
 namespace MagazynPro.Controllers
 {
@@ -55,11 +56,8 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("NazwaProduktu,Cena,Ilosc")] Produkt produkt)
+        public async Task<IActionResult> Create(Produkt produkt)
         {
-            //Console.WriteLine($"Nazwa: {produkt.NazwaProduktu}");
-            //Console.WriteLine($"Cena: {produkt.Cena}");
-            //Console.WriteLine($"Ilość: {produkt.Ilosc}");
             if (ModelState.IsValid)
             {
                 try
@@ -81,6 +79,13 @@ namespace MagazynPro.Controllers
                     Console.WriteLine($"Błąd walidacji: {error.ErrorMessage}");
                 }
             }
+            ViewBag.Produkty = _context.Produkty
+                .Select(p => new SelectListItem
+                {
+                    Value = p.Id.ToString(),
+                    Text = $"{p.NazwaProduktu} - {p.Cena:C}"
+                })
+                .ToList();
 
             // Jeśli coś poszło nie tak, zwróć widok z produktem
             return View(produkt);
@@ -107,34 +112,34 @@ namespace MagazynPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NazwaProduktu,Cena,Ilosc")] Produkt produkt)
+        public async Task<IActionResult> Edit(int id, Produkt produkt)
         {
             if (id != produkt.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                if (ModelState.IsValid)
                 {
                     _context.Update(produkt);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProduktExists(produkt.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
             }
-            return View(produkt);
+            catch (FormatException ex)
+            {
+                ModelState.AddModelError(nameof(produkt.CenaInput), ex.Message); // Dodaj błąd do ModelState
+            }
+            ViewBag.Produkty = _context.Produkty
+                .Select(p => new SelectListItem
+                {
+                    Value = p.Id.ToString(),
+                    Text = $"{p.NazwaProduktu} - {p.Cena:C}"
+                })
+                .ToList();
+            return View(produkt); // Powróć do widoku z błędami
         }
 
         // GET: Produkts/Delete/5

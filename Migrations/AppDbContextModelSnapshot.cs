@@ -22,25 +22,6 @@ namespace MagazynPro.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Klient", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Imie")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Nazwisko")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("Klienci");
-                });
-
             modelBuilder.Entity("MagazynPro.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -63,9 +44,6 @@ namespace MagazynPro.Migrations
                     b.Property<string>("Imie")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("KlientUserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -106,8 +84,6 @@ namespace MagazynPro.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("KlientUserId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -117,6 +93,49 @@ namespace MagazynPro.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("MagazynPro.Models.Klient", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Imie")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Nazwisko")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Klienci");
+                });
+
+            modelBuilder.Entity("MagazynPro.Models.Produkt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Cena")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int>("Ilosc")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NazwaProduktu")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Produkty");
                 });
 
             modelBuilder.Entity("MagazynPro.Models.Zamowienie", b =>
@@ -282,48 +301,26 @@ namespace MagazynPro.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Produkt", b =>
+            modelBuilder.Entity("MagazynPro.Models.Klient", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("MagazynPro.Models.ApplicationUser", "ApplicationUser")
+                        .WithOne("Klient")
+                        .HasForeignKey("MagazynPro.Models.Klient", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Cena")
-                        .HasColumnType("decimal(8,2)");
-
-                    b.Property<int>("Ilosc")
-                        .HasColumnType("int");
-
-                    b.Property<string>("NazwaProduktu")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Produkty");
-                });
-
-            modelBuilder.Entity("MagazynPro.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("Klient", "Klient")
-                        .WithMany()
-                        .HasForeignKey("KlientUserId");
-
-                    b.Navigation("Klient");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("MagazynPro.Models.Zamowienie", b =>
                 {
-                    b.HasOne("Klient", "Klient")
+                    b.HasOne("MagazynPro.Models.Klient", "Klient")
                         .WithMany("Zamowienia")
                         .HasForeignKey("KlientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Produkt", "Produkt")
+                    b.HasOne("MagazynPro.Models.Produkt", "Produkt")
                         .WithMany("Zamowienia")
                         .HasForeignKey("ProduktId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -385,12 +382,18 @@ namespace MagazynPro.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Klient", b =>
+            modelBuilder.Entity("MagazynPro.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Klient")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MagazynPro.Models.Klient", b =>
                 {
                     b.Navigation("Zamowienia");
                 });
 
-            modelBuilder.Entity("Produkt", b =>
+            modelBuilder.Entity("MagazynPro.Models.Produkt", b =>
                 {
                     b.Navigation("Zamowienia");
                 });

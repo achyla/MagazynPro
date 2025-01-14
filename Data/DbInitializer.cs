@@ -13,6 +13,8 @@ namespace MagazynPro.Data
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
+
 
             // Tworzenie ról
             var roles = new[] { "Admin", "User" };
@@ -40,6 +42,16 @@ namespace MagazynPro.Data
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");
+                    // Dodaj administratora do tabeli Klienci
+                    var klient = new Klient
+                    {
+                        UserId = adminUser.Id,
+                        Imie = adminUser.Imie,
+                        Nazwisko = adminUser.Nazwisko
+                    };
+
+                    dbContext.Klienci.Add(klient);
+                    await dbContext.SaveChangesAsync();
                 }
                 else
                 {
@@ -47,6 +59,22 @@ namespace MagazynPro.Data
                     {
                         Console.WriteLine($"Error: {error.Description}");
                     }
+                }
+            }
+            else
+            {
+                // Jeśli admin istnieje, sprawdź, czy jest w tabeli Klienci
+                if (!dbContext.Klienci.Any(k => k.UserId == adminUser.Id))
+                {
+                    var klient = new Klient
+                    {
+                        UserId = adminUser.Id,
+                        Imie = adminUser.Imie,
+                        Nazwisko = adminUser.Nazwisko
+                    };
+
+                    dbContext.Klienci.Add(klient);
+                    await dbContext.SaveChangesAsync();
                 }
             }
         }

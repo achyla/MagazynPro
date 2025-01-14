@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<MagazynPro.Models.Zamowienie>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Zamówienia";
 }
 
-<h1>Index</h1>
+<h1>:. Aktualne zamówienia .:</h1>
 
 <p>
     <a asp-action="Create">Dodaj nowe zamówienie</a>
@@ -19,10 +19,10 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>@Html.DisplayName("Produkt")</th>
-                <th>@Html.DisplayNameFor(model => model.First().Ilosc)</th>
-                <th>@Html.DisplayNameFor(model => model.First().DataZamowienia)</th>
-                <th>@Html.DisplayName("Klient")</th>
+                <th>@Html.DisplayNameFor(model => model.First().Id)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Produkt.NazwaProduktu)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Klient.ApplicationUser.UserName)</th>
+                <th>@Html.DisplayName("Łączna wartość")</th> <!-- Dodano nagłówek kolumny -->
                 <th>Akcje</th>
             </tr>
         </thead>
@@ -30,10 +30,10 @@ else
             @foreach (var item in Model)
             {
                 <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Id)</td>
                     <td>@Html.DisplayFor(modelItem => item.Produkt.NazwaProduktu)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Ilosc)</td>
-                    <td>@Html.DisplayFor(modelItem => item.DataZamowienia)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Klient.Imie)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Klient.ApplicationUser.UserName)</td>
+                    <td>@string.Format("{0:C}", item.Ilosc * item.Produkt.Cena)</td> <!-- Obliczenie wartości -->
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Edytuj</a>
                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Szczegóły</a>

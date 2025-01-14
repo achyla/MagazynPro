@@ -1,32 +1,67 @@
 ﻿@model MagazynPro.Models.Zamowienie
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Szczegóły zamówienia";
 }
 
-<h1>Details</h1>
+<h1>Szczegóły zamówienia</h1>
 
 <div>
-    <h4>Zamowienia</h4>
-    <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <!-- ID zamówienia -->
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+
+        <!-- Nazwa produktu -->
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Produkt.NazwaProduktu)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Produkt.NazwaProduktu)
         </dd>
-        <dt class = "col-sm-2">
+
+        <!-- Ilość -->
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Ilosc)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Ilosc)
         </dd>
-        <dt class = "col-sm-2">
+
+        <!-- Cena produktu -->
+        <dt class="col-sm-2">
+            @Html.DisplayName("Cena produktu")
+        </dt>
+        <dd class="col-sm-10">
+            @string.Format("{0:C}", Model.Produkt.Cena)
+        </dd>
+
+        <!-- Data zamówienia -->
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DataZamowienia)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DataZamowienia)
+        </dd>
+
+        <!-- Nazwa użytkownika -->
+        <dt class="col-sm-2">
+            @Html.DisplayName("Użytkownik")
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Klient.ApplicationUser.UserName
+        </dd>
+
+        <!-- Imię i nazwisko użytkownika -->
+        <dt class="col-sm-2">
+            @Html.DisplayName("Imię i nazwisko")
+        </dt>
+        <dd class="col-sm-10">
+            @($"{Model.Klient?.Imie} {Model.Klient?.Nazwisko}")
         </dd>
     </dl>
 </div>

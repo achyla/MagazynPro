@@ -19,6 +19,12 @@ namespace MagazynPro.Data
         {
             base.OnModelCreating(builder);
 
+            // Relacja między Klient a ApplicationUser
+            builder.Entity<Klient>()
+                .HasOne(k => k.ApplicationUser)
+                .WithOne(au => au.Klient)
+                .HasForeignKey<Klient>(k => k.UserId); // Klucz obcy to UserId
+
             builder.Entity<Produkt>()
                 .Property(p => p.Cena)
                 .HasColumnType("decimal(8,2)"); // Ustawienie precyzji i skali

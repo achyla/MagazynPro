@@ -2,8 +2,18 @@ using MagazynPro.Data;
 using MagazynPro.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Ustawienie kultury polskiej
+var cultureInfo = new CultureInfo("pl-PL")
+{
+    NumberFormat = { CurrencySymbol = "zł" } // Symbol waluty
+};
+
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 // Rejestracja AppDbContext z Entity Framework Core
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -72,6 +82,6 @@ app.UseAuthorization(); // Middleware autoryzacji
 app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Zamowienia}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
