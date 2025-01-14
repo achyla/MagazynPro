@@ -4,9 +4,8 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<h1>Edycja Zamówienia</h1>
 
-<h4>Zamowienia</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -17,6 +16,7 @@
                 <label for="NazwaProduktu" class="form-label">Nazwa Produktu</label>
                 <span id="NazwaProduktu" class="form-control-plaintext">
                     @(Model.Produkt?.NazwaProduktu ?? "Produkt nieznany")
+                    @(Model.Produkt?.Ilosc != null ? $"(Dostępne: {Model.Produkt.Ilosc})" : "")
                 </span>
             </div>
             <br>

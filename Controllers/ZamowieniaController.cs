@@ -87,6 +87,7 @@ namespace MagazynPro.Controllers
             // Znajdź klienta w bazie danych
             var klient = _context.Klienci.FirstOrDefault(k => k.UserId == userId);
 
+
             if (klient == null)
             {
                 // Obsłuż sytuację, gdy klient nie istnieje
@@ -240,16 +241,21 @@ namespace MagazynPro.Controllers
                 return NotFound();
             }
 
-            // Pobierz ID zalogowanego użytkownika
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // Znajdź klienta powiązanego z zalogowanym użytkownikiem
-            var klient = await _context.Klienci.FirstOrDefaultAsync(k => k.UserId == userId);
-
-            if (klient == null || zamowienie.KlientId != klient.UserId)
+            // Sprawdź, czy użytkownik jest administratorem
+            if (!User.IsInRole("Admin"))
             {
-                // Jeśli klient nie istnieje lub nie jest właścicielem zamówienia, zwróć błąd
-                return RedirectToAction("Error", "Home");
+
+                // Pobierz ID zalogowanego użytkownika
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                // Znajdź klienta powiązanego z zalogowanym użytkownikiem
+                var klient = await _context.Klienci.FirstOrDefaultAsync(k => k.UserId == userId);
+
+                if (klient == null || zamowienie.KlientId != klient.UserId)
+                {
+                    // Jeśli klient nie istnieje lub nie jest właścicielem zamówienia, zwróć błąd
+                    return RedirectToAction("Error", "Home");
+                }
             }
 
             // Wypełnij ViewBag.Produkty dla potencjalnych edycji produktu (jeśli konieczne)
@@ -370,13 +376,25 @@ namespace MagazynPro.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var zamowienia = await _context.Zamowienia.FindAsync(id);
-            if (zamowienia != null)
-            {
+            // Pobierz zamówienie z bazy danych
+            var zamowienie = await _context.Zamowienia
+                .Include(z => z.Produkt) // Załaduj powiązany produkt
+                .FirstOrDefaultAsync(z => z.Id == id);
 
-                _context.Zamowienia.Remove(zamowienia);
+            if (zamowienie == null)
+            {
+                return NotFound();
             }
 
+            // Przywróć ilość produktu na magazyn
+            if (zamowienie.Produkt != null)
+            {
+                zamowienie.Produkt.Ilosc += zamowienie.Ilosc; // Dodaj zamówioną ilość z powrotem do magazynu
+                _context.Produkty.Update(zamowienie.Produkt); // Zaktualizuj produkt w bazie danych
+            }
+
+            // Usuń zamówienie z bazy danych
+            _context.Zamowienia.Remove(zamowienie);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

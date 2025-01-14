@@ -10,12 +10,12 @@
     <div class="col-md-4">
         <form asp-action="Create" method="post">
             <div class="form-group">
-                <label asp-for="NazwaProduktu" class="control-label"></label>
+                <label for="NazwaProduktu" class="control-label">Produkt</label>
                 <input asp-for="NazwaProduktu" class="form-control" />
                 <span asp-validation-for="NazwaProduktu" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CenaInput" class="control-label"></label>
+                <label for="CenaInput" class="control-label">Cena</label>
                 <input asp-for="CenaInput" class="form-control" type="text" />
                 <span asp-validation-for="CenaInput" class="text-danger"></span>
             </div>

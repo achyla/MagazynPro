@@ -15,7 +15,6 @@ namespace MagazynPro.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
-
             // Tworzenie ról
             var roles = new[] { "Admin", "User" };
             foreach (var role in roles)
@@ -33,50 +32,40 @@ namespace MagazynPro.Data
             {
                 adminUser = new ApplicationUser
                 {
-                    UserName = "admin",
+                    UserName = adminUsername,
                     Imie = "Administrator",
                     Nazwisko = "Administrator"
                 };
 
                 var result = await userManager.CreateAsync(adminUser, "Admin@123");
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                    // Dodaj administratora do tabeli Klienci
-                    var klient = new Klient
-                    {
-                        UserId = adminUser.Id,
-                        Imie = adminUser.Imie,
-                        Nazwisko = adminUser.Nazwisko
-                    };
-
-                    dbContext.Klienci.Add(klient);
-                    await dbContext.SaveChangesAsync();
-                }
-                else
+                if (!result.Succeeded)
                 {
                     foreach (var error in result.Errors)
                     {
                         Console.WriteLine($"Error: {error.Description}");
                     }
+                    return; // Zatrzymaj inicjalizację, jeśli utworzenie admina się nie powiodło
                 }
-            }
-            else
-            {
-                // Jeśli admin istnieje, sprawdź, czy jest w tabeli Klienci
-                if (!dbContext.Klienci.Any(k => k.UserId == adminUser.Id))
-                {
-                    var klient = new Klient
-                    {
-                        UserId = adminUser.Id,
-                        Imie = adminUser.Imie,
-                        Nazwisko = adminUser.Nazwisko
-                    };
 
-                    dbContext.Klienci.Add(klient);
-                    await dbContext.SaveChangesAsync();
-                }
+                await userManager.AddToRoleAsync(adminUser, "Admin");
             }
+
+            // Upewnij się, że administrator istnieje w tabeli Klienci
+            var adminKlient = dbContext.Klienci.FirstOrDefault(k => k.UserId == adminUser.Id);
+            if (adminKlient == null)
+            {
+                adminKlient = new Klient
+                {
+                    UserId = adminUser.Id,
+                    Imie = adminUser.Imie ?? "Administrator",
+                    Nazwisko = adminUser.Nazwisko ?? "Administrator"
+                };
+
+                dbContext.Klienci.Add(adminKlient);
+                await dbContext.SaveChangesAsync();
+            }
+
+            Console.WriteLine("Administrator został poprawnie zainicjalizowany.");
         }
     }
 }

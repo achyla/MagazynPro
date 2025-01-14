@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MagazynPro.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250114214019_InitialMigration")]
+    [Migration("20250114231352_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
